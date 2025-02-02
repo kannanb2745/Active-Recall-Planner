@@ -45,7 +45,6 @@ class CalendarApp:
         self.create_ui()
         self.render_calendar()
 
-    # Create UI elements
     def create_ui(self):
         # Header with motivational quote
         self.header_frame = tk.Frame(self.root, bg="#4CAF50")
@@ -84,7 +83,6 @@ class CalendarApp:
         self.calendar_frame = tk.Frame(self.root)
         self.calendar_frame.pack(expand=True, fill=tk.BOTH)
 
-    # Render calendar for the current month
     def render_calendar(self):
         for widget in self.calendar_frame.winfo_children():
             widget.destroy()
@@ -93,16 +91,13 @@ class CalendarApp:
 
         days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
         for i, day in enumerate(days):
-            tk.Label(self.calendar_frame, text=day, font=("Arial", 14, "bold")).grid(
-                row=0, column=i, padx=5, pady=5
-            )
+            tk.Label(self.calendar_frame, text=day, font=("Arial", 14, "bold")).grid(row=0, column=i, padx=5, pady=5)
 
         first_day = self.current_date.replace(day=1)
         start_day = (first_day.weekday() + 1) % 7
         days_in_month = (first_day.replace(month=self.current_date.month % 12 + 1, day=1) - timedelta(days=1)).day
 
-        row = 1
-        col = start_day
+        row, col = 1, start_day
         for day in range(1, days_in_month + 1):
             date_str = self.current_date.replace(day=day).strftime("%Y-%m-%d")
             button_color = "#90CAF9" if date_str in tasks else "#E3F2FD"
@@ -120,24 +115,23 @@ class CalendarApp:
                 col = 0
                 row += 1
 
-    # Show tasks for selected day
     def show_tasks(self, day):
         self.selected_date = self.current_date.replace(day=day)
         date_str = self.selected_date.strftime("%Y-%m-%d")
         task_list = tasks.get(date_str, [])
 
         task_str = "\n".join(f"- {task}" for task in task_list) if task_list else "No tasks scheduled."
-        response = messagebox.askyesno(
-            "Tasks", f"Tasks for {date_str}:\n\n{task_str}\n\nDo you want to add a new topic?"
-        )
-        if response:
+        response = messagebox.askyesnocancel("Tasks", f"Tasks for {date_str}:\n\n{task_str}\n\nYes: Add Task | No: Remove Task | Cancel: Close")
+        
+        if response is True:
             new_task = simpledialog.askstring("New Task", "Enter the topic you learned:")
             if new_task:
                 self.schedule_memory(new_task)
                 save_tasks()
                 self.render_calendar()
+        elif response is False:
+            self.remove_task()
 
-    # Schedule memory tasks based on intervals
     def schedule_memory(self, topic):
         initial_date = self.selected_date
         for interval in SCHEDULE_INTERVALS:
@@ -147,19 +141,35 @@ class CalendarApp:
             if topic not in tasks[revision_date]:
                 tasks[revision_date].append(topic)
 
-    # Navigate to previous month
+    def remove_task(self):
+        date_str = self.selected_date.strftime("%Y-%m-%d")
+        if date_str not in tasks or not tasks[date_str]:
+            messagebox.showinfo("Remove Task", "No tasks to remove on this date.")
+            return
+
+        task_to_remove = simpledialog.askstring("Remove Task", "Enter the task to remove:")
+        if task_to_remove:
+            # Remove from all scheduled dates
+            for date in list(tasks.keys()):
+                if task_to_remove in tasks[date]:
+                    tasks[date].remove(task_to_remove)
+                    if not tasks[date]:
+                        del tasks[date]  # Remove date if no tasks remain
+
+            save_tasks()
+            self.render_calendar()
+            messagebox.showinfo("Success", f"Task '{task_to_remove}' removed successfully!")
+
     def prev_month(self):
         self.current_date = (self.current_date.replace(day=1) - timedelta(days=1)).replace(day=1)
         self.render_calendar()
 
-    # Navigate to next month
     def next_month(self):
         next_month = self.current_date.month % 12 + 1
         year = self.current_date.year + (1 if next_month == 1 else 0)
         self.current_date = self.current_date.replace(year=year, month=next_month, day=1)
         self.render_calendar()
 
-# Run the application
 if __name__ == "__main__":
     root = tk.Tk()
     app = CalendarApp(root)
