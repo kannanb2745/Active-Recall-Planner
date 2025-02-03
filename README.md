@@ -1,6 +1,6 @@
 # Active Recall Planner
 
-The ***Active Recall Planner*** is a ***calendar-based memory scheduling tool*** built using ***Tkinter*** in Python. It helps users recall topics based on ***spaced repetition*** techniques. 
+The ***Active Recall Planner*** is a tool designed to help users improve ***memory retention*** by applying the principles of ***spaced repetition***. This method involves reviewing information at increasing intervals to maximize long-term retention. Using ***Tkinter***, a popular Python library for building graphical user interfaces ***(GUIs)***, the tool is ***calendar-based***, allowing users to schedule their reviews effectively
 <br>
 
 ---
