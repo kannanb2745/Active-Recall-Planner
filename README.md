@@ -17,7 +17,6 @@ The ***Active Recall Planner*** is a ***calendar-based memory scheduling tool***
 - **Task Highlights:** Days with scheduled recalls are highlighted in the calendar.
 - **Motivational Quotes:** Displays random quotes for encouragement.
 
-<br>
 
 ---
 
@@ -61,7 +60,6 @@ python Active-Recall-Planner.py
     Normal days remain uncolored.
 
 ---
-<br>
 
 ### 🛠 Future Enhancements
 
