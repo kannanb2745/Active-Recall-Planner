@@ -32,7 +32,7 @@ git clone https://github.com/kannanb2745/Active-Recall-Planner.git
 cd Active-Recall-Planner
 ```
 
-### **3️. Run the Application**
+### **3. Run the Application**
 
 ```sh
 python Active-Recall-Planner.py
