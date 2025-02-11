@@ -5,22 +5,19 @@ import json
 import os
 import random
 
-# File to store tasks
 TASK_FILE = "memory_schedule_tasks.json"
 
-# Load existing tasks or create new
 if os.path.exists(TASK_FILE):
     with open(TASK_FILE, "r") as file:
         tasks = json.load(file)
 else:
     tasks = {}
 
-# Save tasks to file
 def save_tasks():
+    """Save tasks to the TASK_FILE in JSON format."""
     with open(TASK_FILE, "w") as file:
         json.dump(tasks, file, indent=4)
 
-# Motivational quotes
 QUOTES = [
     "The future belongs to those who prepare for it today.",
     "Small progress is still progress.",
@@ -29,12 +26,11 @@ QUOTES = [
     "Consistency is the key to mastery.",
 ]
 
-# Memory schedule intervals
-SCHEDULE_INTERVALS = [0, 1, 3, 6, 13, 27, 55, 111, 223, 364]  # Days from initial learning
+SCHEDULE_INTERVALS = [0, 1, 3, 6, 13, 27, 55, 111, 223, 364]
 
-# Create main Calendar app
 class CalendarApp:
     def __init__(self, root):
+        """Initialize the CalendarApp with the root window, set up UI, and render the calendar."""
         self.root = root
         self.root.title("Memory Schedule Calendar")
         self.root.geometry("900x700")
@@ -46,7 +42,7 @@ class CalendarApp:
         self.render_calendar()
 
     def create_ui(self):
-        # Header with motivational quote
+        """Create the user interface components."""
         self.header_frame = tk.Frame(self.root, bg="#4CAF50")
         self.header_frame.pack(fill=tk.X)
 
@@ -60,7 +56,6 @@ class CalendarApp:
         )
         self.quote_label.pack()
 
-        # Month navigation
         self.navigation_frame = tk.Frame(self.root, bg="#f0f0f0")
         self.navigation_frame.pack(fill=tk.X)
 
@@ -79,11 +74,11 @@ class CalendarApp:
         )
         self.next_button.pack(side=tk.LEFT, padx=10)
 
-        # Calendar display frame
         self.calendar_frame = tk.Frame(self.root)
         self.calendar_frame.pack(expand=True, fill=tk.BOTH)
 
     def render_calendar(self):
+        """Render the calendar grid based on the current month and tasks."""
         for widget in self.calendar_frame.winfo_children():
             widget.destroy()
 
@@ -116,23 +111,24 @@ class CalendarApp:
                 row += 1
 
     def show_tasks(self, day):
+        """Display the tasks for the selected day and allow adding/removing tasks."""
         self.selected_date = self.current_date.replace(day=day)
         date_str = self.selected_date.strftime("%Y-%m-%d")
         task_list = tasks.get(date_str, [])
 
         task_str = "\n".join(f"- {task}" for task in task_list) if task_list else "No tasks scheduled."
         response = messagebox.askyesnocancel("Tasks", f"Tasks for {date_str}:\n\n{task_str}\n\nYes: Add Task | No: Remove Task | Cancel: Close")
-        
         if response is True:
             new_task = simpledialog.askstring("New Task", "Enter the topic you learned:")
             if new_task:
                 self.schedule_memory(new_task)
-                save_tasks()
-                self.render_calendar()
+            save_tasks()
+            self.render_calendar()
         elif response is False:
             self.remove_task()
 
     def schedule_memory(self, topic):
+        """Schedule memory revision for the topic on future dates based on defined intervals."""
         initial_date = self.selected_date
         for interval in SCHEDULE_INTERVALS:
             revision_date = (initial_date + timedelta(days=interval)).strftime("%Y-%m-%d")
@@ -142,6 +138,7 @@ class CalendarApp:
                 tasks[revision_date].append(topic)
 
     def remove_task(self):
+        """Remove a task from all scheduled dates."""
         date_str = self.selected_date.strftime("%Y-%m-%d")
         if date_str not in tasks or not tasks[date_str]:
             messagebox.showinfo("Remove Task", "No tasks to remove on this date.")
@@ -149,22 +146,23 @@ class CalendarApp:
 
         task_to_remove = simpledialog.askstring("Remove Task", "Enter the task to remove:")
         if task_to_remove:
-            # Remove from all scheduled dates
             for date in list(tasks.keys()):
                 if task_to_remove in tasks[date]:
                     tasks[date].remove(task_to_remove)
-                    if not tasks[date]:
-                        del tasks[date]  # Remove date if no tasks remain
+                if not tasks[date]:
+                    del tasks[date]
 
             save_tasks()
             self.render_calendar()
             messagebox.showinfo("Success", f"Task '{task_to_remove}' removed successfully!")
 
     def prev_month(self):
+        """Navigate to the previous month."""
         self.current_date = (self.current_date.replace(day=1) - timedelta(days=1)).replace(day=1)
         self.render_calendar()
 
     def next_month(self):
+        """Navigate to the next month."""
         next_month = self.current_date.month % 12 + 1
         year = self.current_date.year + (1 if next_month == 1 else 0)
         self.current_date = self.current_date.replace(year=year, month=next_month, day=1)
